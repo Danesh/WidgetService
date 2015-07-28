@@ -24,11 +24,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class MyService extends Service {
+public class MyService3 extends Service {
     private Handler mHandler;
     private int mVideoPosition;
 
-    public MyService() {
+    public MyService3() {
     }
 
     @Override
@@ -143,9 +143,20 @@ public class MyService extends Service {
 
     private View getView(int position) {
         final View view;
-                view = new DoodleView(getBaseContext());
-                ((DoodleView) view).setLineWidth(10);
-                view.setBackgroundColor(Color.BLUE);
+                WebView webView = new WebView(getBaseContext());
+                webView.getSettings().setJavaScriptEnabled(false);
+                webView.getSettings().setRenderPriority(WebSettings.RenderPriority.HIGH);
+                webView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+                webView.setWebViewClient(new WebViewClient() {
+                    public boolean shouldOverrideUrlLoading(WebView view, String url){
+                        // do your handling codes here, which url is the requested url
+                        // probably you need to open that url rather than redirect:
+                        view.loadUrl(url);
+                        return false; // then it is not handled by default action
+                    }
+                });
+                webView.loadUrl("http://twitter.com/cyanogen");
+                view = webView;
         return view;
     }
 }

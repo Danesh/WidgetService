@@ -24,10 +24,20 @@
         </activity>
 
         <service
+            android:process=":A"
             android:name=".MyService"
             android:enabled="true"
-            android:exported="true" >
-        </service>
+            android:exported="true" />
+        <service
+            android:process=":B"
+            android:name=".MyService2"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:process=":C"
+            android:name=".MyService3"
+            android:enabled="true"
+            android:exported="true" />
     </application>
 
 </manifest>

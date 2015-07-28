@@ -24,11 +24,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class MyService extends Service {
+public class MyService2 extends Service {
     private Handler mHandler;
     private int mVideoPosition;
 
-    public MyService() {
+    public MyService2() {
     }
 
     @Override
@@ -143,9 +143,17 @@ public class MyService extends Service {
 
     private View getView(int position) {
         final View view;
-                view = new DoodleView(getBaseContext());
-                ((DoodleView) view).setLineWidth(10);
-                view.setBackgroundColor(Color.BLUE);
+                final TextureVideoView videoView = new TextureVideoView(getBaseContext());
+                videoView.setVideoURI(Uri.parse("content://media/external/video/media/1824"));
+                videoView.start();
+        videoView.seekTo(1);
+                videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(MediaPlayer mp) {
+                        mp.setLooping(true);
+                    }
+                });
+                view = videoView;
         return view;
     }
 }

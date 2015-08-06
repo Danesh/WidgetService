@@ -5,16 +5,21 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.media.MediaPlayer;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.provider.MediaStore;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.sprylab.android.widget.TextureVideoView;
@@ -68,13 +73,13 @@ public class MyService2 extends Service {
                             return;
                         }
 
-                        if (layoutParams.x == x + 50 && layoutParams.y == y + 50 && layoutParams.width == width - 100 && layoutParams.height == 1500) {
+                        if (layoutParams.x == x + 50 && layoutParams.y == y + 50 && layoutParams.width == width - 100) {
                             return;
                         }
                         layoutParams.x = x + 50;
                         layoutParams.y = y + 50;
                         layoutParams.width = width - 100;
-                        layoutParams.height = 1500;
+                        layoutParams.height = 550;
 
 
                         final int visible = visibility ? View.VISIBLE : View.GONE;
@@ -89,16 +94,13 @@ public class MyService2 extends Service {
                                 return;
                             }
                             view.setVisibility(visible);
-                            if (view instanceof TextureVideoView) {
-                                TextureVideoView videoView = ((TextureVideoView) view);
-                                if (view.getVisibility() == View.GONE && videoView.isPlaying()) {
-                                    ((TextureVideoView) view).pause();
-                                    mVideoPosition = videoView.getCurrentPosition();
-                                } else if (!videoView.isPlaying()){
-                                    System.out.println("Start video");
-                                    videoView.seekTo(mVideoPosition);
-                                    ((TextureVideoView) view).start();
-                                }
+                            if (view instanceof FrameLayout) {
+                                TextureVideoView videoView = ((TextureVideoView) ((FrameLayout) view).getChildAt(0));
+                                ImageView thumbnail = ((ImageView) ((FrameLayout) view).getChildAt(1));
+                                thumbnail.setImageResource(R.drawable.ic_play);
+                                videoView.pause();
+                                thumbnail.getDrawable().setTint(Color.WHITE);
+                                mVideoPosition = videoView.getCurrentPosition();
                             }
                             System.out.println(position + " -> " + view.getVisibility());
                             if (view.getVisibility() != View.GONE) windowManager.updateViewLayout(view, layoutParams);
@@ -142,18 +144,38 @@ public class MyService2 extends Service {
     }
 
     private View getView(int position) {
-        final View view;
-                final TextureVideoView videoView = new TextureVideoView(getBaseContext());
-                videoView.setVideoURI(Uri.parse("content://media/external/video/media/1824"));
-                videoView.start();
-        videoView.seekTo(1);
-                videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                    @Override
-                    public void onPrepared(MediaPlayer mp) {
-                        mp.setLooping(true);
-                    }
-                });
-                view = videoView;
-        return view;
+        final ImageView thumbnail = new ImageView(getBaseContext());
+        thumbnail.setImageResource(R.drawable.ic_play);
+        thumbnail.getDrawable().setTint(Color.WHITE);
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(200, 200);
+        layoutParams.gravity = Gravity.CENTER;
+        thumbnail.setLayoutParams(layoutParams);
+        final FrameLayout frameLayout = new FrameLayout(getBaseContext());
+        final TextureVideoView videoView = new TextureVideoView(getBaseContext());
+        videoView.setVideoURI(Uri.parse("content://media/external/video/media/1824"));
+        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                mp.setLooping(true);
+            }
+        });
+        thumbnail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!videoView.isPlaying()) {
+                    videoView.seekTo(mVideoPosition);
+                    videoView.start();
+                    thumbnail.setImageResource(R.drawable.ic_pause_circle_filled_black_48dp);
+                } else {
+                    thumbnail.setImageResource(R.drawable.ic_play);
+                    mVideoPosition = videoView.getCurrentPosition();
+                    videoView.pause();
+                }
+                thumbnail.getDrawable().setTint(Color.WHITE);
+            }
+        });
+        frameLayout.addView(videoView);
+        frameLayout.addView(thumbnail);
+        return frameLayout;
     }
 }

@@ -64,9 +64,9 @@ public class MyService extends Service {
                         } else {
                             layoutParams = (WindowManager.LayoutParams) mViews.get(position).getLayoutParams();
                         }
-                        if (Math.abs(layoutParams.x - x) <= 5) {
-                            return;
-                        }
+//                        if (Math.abs(layoutParams.x - (x + 50)) <= 5) {
+//                            return;
+//                        }
 
                         if (layoutParams.x == x + 50 && layoutParams.y == y + 50 && layoutParams.width == width - 100 && layoutParams.height == 1500) {
                             return;
@@ -76,12 +76,12 @@ public class MyService extends Service {
                         layoutParams.width = width - 100;
                         layoutParams.height = 1500;
 
+                        System.out.println("FIRST " + x);
 
                         final int visible = visibility ? View.VISIBLE : View.GONE;
                         if (!mViews.containsKey(position)) {
                             final View view = getView(position);
                             mViews.put(position, view);
-                            System.out.println("Add view " + position);
                             windowManager.addView(view, layoutParams);
                         } else {
                             View view = mViews.get(position);
@@ -95,12 +95,10 @@ public class MyService extends Service {
                                     ((TextureVideoView) view).pause();
                                     mVideoPosition = videoView.getCurrentPosition();
                                 } else if (!videoView.isPlaying()){
-                                    System.out.println("Start video");
                                     videoView.seekTo(mVideoPosition);
                                     ((TextureVideoView) view).start();
                                 }
                             }
-                            System.out.println(position + " -> " + view.getVisibility());
                             if (view.getVisibility() != View.GONE) windowManager.updateViewLayout(view, layoutParams);
                         }
                     }
